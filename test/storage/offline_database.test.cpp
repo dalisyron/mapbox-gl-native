@@ -526,6 +526,73 @@ TEST(OfflineDatabase, DeleteRegion) {
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 
+TEST(OfflineDatabase, Invalidate) {
+    using namespace std::chrono_literals;
+
+    FixtureLog log;
+    OfflineDatabase db(":memory:");
+
+    Response response;
+    response.noContent = true;
+    response.mustRevalidate = false;
+    response.expires = util::now() + 1h;
+
+    const Resource ambient = Resource::tile("mapbox://tile_ambient", 1, 0, 0, 0, Tileset::Scheme::XYZ);
+    db.put(ambient, response);
+
+    OfflineTilePyramidRegionDefinition definition { "mapbox://style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true };
+    OfflineRegionMetadata metadata {{ 1, 2, 3 }};
+
+    auto region1 = db.createRegion(definition, metadata);
+    const Resource offline1 = Resource::tile("mapbox://tile_offline_region1", 1.0, 0, 0, 0, Tileset::Scheme::XYZ);
+    db.putRegionResource(region1->getID(), offline1, response);
+
+    auto region2 = db.createRegion(definition, metadata);
+    const Resource offline2 = Resource::tile("mapbox://tile_offline_region2", 1.0, 0, 0, 0, Tileset::Scheme::XYZ);
+    db.putRegionResource(region2->getID(), offline2, response);
+
+    // Prior to invalidation, all tiles are usable.
+    EXPECT_TRUE(db.get(ambient)->isUsable() == true);
+    EXPECT_TRUE(db.get(offline1)->isUsable() == true);
+    EXPECT_TRUE(db.get(offline2)->isUsable() == true);
+
+    // Invalidate a region will not invalidate ambient
+    // tiles or other regions.
+    EXPECT_TRUE(db.invalidateRegion(region1->getID()) == nullptr);
+
+    EXPECT_TRUE(db.get(ambient)->isUsable() == true);
+    EXPECT_TRUE(db.get(offline1)->isUsable() == false);
+    EXPECT_TRUE(db.get(offline2)->isUsable() == true);
+
+    // Invalidate the ambient cache will not invalidate
+    // the regions that are still valid.
+    EXPECT_TRUE(db.invalidateTileCache() == nullptr);
+
+    EXPECT_TRUE(db.get(ambient)->isUsable() == false);
+    EXPECT_TRUE(db.get(offline1)->isUsable() == false);
+    EXPECT_TRUE(db.get(offline2)->isUsable() == true);
+
+    // Sanity check.
+    EXPECT_TRUE(db.get(ambient)->expires < util::now());
+    EXPECT_TRUE(db.get(offline1)->expires < util::now());
+    EXPECT_TRUE(db.get(offline2)->expires > util::now());
+
+    EXPECT_TRUE(db.get(ambient)->mustRevalidate == true);
+    EXPECT_TRUE(db.get(offline1)->mustRevalidate == true);
+    EXPECT_TRUE(db.get(offline2)->mustRevalidate == false);
+
+    // Should not throw.
+    EXPECT_TRUE(db.invalidateRegion(region2->getID()) == nullptr);
+    EXPECT_TRUE(db.invalidateRegion(region2->getID()) == nullptr);
+    EXPECT_TRUE(db.invalidateRegion(123) == nullptr);
+
+    // Invalidate != delete.
+    auto regions = db.listRegions().value();
+    ASSERT_EQ(2u, regions.size());
+
+    EXPECT_EQ(0u, log.uncheckedCount());
+}
+
 TEST(OfflineDatabase, CreateRegionInfiniteMaxZoom) {
     FixtureLog log;
     OfflineDatabase db(":memory:");
