@@ -71,10 +71,6 @@ public:
 
     mat4 matrixForTile(const UnwrappedTileID&, bool aligned = false) const;
 
-    mat4 projMatrix;
-    mat4 alignedProjMatrix;
-    mat4 nearClippedProjMatrix;
-
     // Stencil handling
 public:
     void renderTileClippingMasks(const std::vector<std::reference_wrapper<RenderTile>>&);

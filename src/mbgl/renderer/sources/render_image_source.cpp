@@ -37,7 +37,7 @@ void RenderImageSource::upload(gfx::UploadPass& uploadPass) {
     }
 }
 
-void RenderImageSource::prepare(PaintParameters& parameters) {
+void RenderImageSource::prepare(const TransformState& state, const MapDebugOptions&) {
     if (!isLoaded()) {
         return;
     }
@@ -47,8 +47,8 @@ void RenderImageSource::prepare(PaintParameters& parameters) {
     for (auto& tileId : tileIds) {
         mat4 matrix;
         matrix::identity(matrix);
-        parameters.state.matrixFor(matrix, tileId);
-        matrix::multiply(matrix, parameters.alignedProjMatrix, matrix);
+        state.matrixFor(matrix, tileId);
+        matrix::multiply(matrix, state.getAlignedProjMatrix(), matrix);
         matrices.push_back(matrix);
     }
 }

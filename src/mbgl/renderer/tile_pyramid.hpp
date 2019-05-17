@@ -44,7 +44,7 @@ public:
                 std::function<std::unique_ptr<Tile> (const OverscaledTileID&)> createTile);
 
     void upload(gfx::UploadPass&);
-    void prepare(PaintParameters&);
+    void prepare(const TransformState&, const MapDebugOptions&);
     void finishRender(PaintParameters&);
 
     std::vector<std::reference_wrapper<RenderTile>> getRenderTiles();

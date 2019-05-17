@@ -81,9 +81,7 @@ void RenderCustomLayer::render(PaintParameters& paintParameters, RenderSource*) 
     parameters.bearing = -state.getBearing() * util::RAD2DEG;
     parameters.pitch = state.getPitch();
     parameters.fieldOfView = state.getFieldOfView();
-    mat4 projMatrix;
-    state.getProjMatrix(projMatrix);
-    parameters.projectionMatrix = projMatrix;
+    parameters.projectionMatrix = state.getDefaultProjMatrix();
 
     MBGL_CHECK_ERROR(host->render(parameters));
 

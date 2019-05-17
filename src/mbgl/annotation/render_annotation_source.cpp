@@ -51,8 +51,8 @@ void RenderAnnotationSource::upload(gfx::UploadPass& uploadPass) {
     tilePyramid.upload(uploadPass);
 }
 
-void RenderAnnotationSource::prepare(PaintParameters& parameters) {
-    tilePyramid.prepare(parameters);
+void RenderAnnotationSource::prepare(const TransformState& state, const MapDebugOptions& debugOptions) {
+    tilePyramid.prepare(state, debugOptions);
 }
 
 void RenderAnnotationSource::finishRender(PaintParameters& parameters) {

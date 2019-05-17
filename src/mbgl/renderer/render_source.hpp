@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/map/mode.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/tile/tile_observer.hpp>
 #include <mbgl/util/mat4.hpp>
@@ -60,7 +61,7 @@ public:
                         const TileParameters&) = 0;
 
     virtual void upload(gfx::UploadPass&) = 0;
-    virtual void prepare(PaintParameters&) = 0;
+    virtual void prepare(const TransformState&, const MapDebugOptions&) = 0;
     virtual void finishRender(PaintParameters&) = 0;
 
     // Returns a list of RenderTiles, sorted by tile id.

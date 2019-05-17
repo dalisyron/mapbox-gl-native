@@ -61,8 +61,8 @@ void RenderVectorSource::upload(gfx::UploadPass& parameters) {
     tilePyramid.upload(parameters);
 }
 
-void RenderVectorSource::prepare(PaintParameters& parameters) {
-    tilePyramid.prepare(parameters);
+void RenderVectorSource::prepare(const TransformState& state, const MapDebugOptions& debugOptions) {
+    tilePyramid.prepare(state, debugOptions);
 }
 
 void RenderVectorSource::finishRender(PaintParameters& parameters) {

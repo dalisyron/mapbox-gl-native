@@ -29,6 +29,11 @@ public:
     void matrixFor(mat4&, const UnwrappedTileID&) const;
     void getProjMatrix(mat4& matrix, uint16_t nearZ = 1, bool aligned = false) const;
 
+    // cached projection matrices
+    const mat4& getDefaultProjMatrix() const;
+    const mat4& getAlignedProjMatrix() const;
+    const mat4& getNearClippedProjMatrix() const;
+
     // Dimensions
     Size getSize() const;
 
@@ -140,6 +145,11 @@ private:
     // cache values for spherical mercator math
     double Bc = Projection::worldSize(scale) / util::DEGREES_MAX;
     double Cc = Projection::worldSize(scale) / util::M2PI;
+
+    // cached projection matrices
+    mutable optional<mat4> defaultProjMatrix;
+    mutable optional<mat4> alignedProjMatrix;
+    mutable optional<mat4> nearClippedProjMatrix;
 };
 
 } // namespace mbgl

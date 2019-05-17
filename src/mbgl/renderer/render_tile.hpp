@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/map/mode.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/mat4.hpp>
 #include <mbgl/style/types.hpp>
@@ -46,7 +47,7 @@ public:
 
     void setMask(TileMask&&);
     void upload(gfx::UploadPass&);
-    void prepare(PaintParameters&);
+    void prepare(const TransformState&, const MapDebugOptions&);
     void finishRender(PaintParameters&);
 
     mat4 translateVtxMatrix(const mat4& tileMatrix,

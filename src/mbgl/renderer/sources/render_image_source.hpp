@@ -16,7 +16,7 @@ public:
     bool isLoaded() const final;
 
     void upload(gfx::UploadPass&) final;
-    void prepare(PaintParameters&) final;
+    void prepare(const TransformState&, const MapDebugOptions&) final;
     void finishRender(PaintParameters&) final;
 
     void update(Immutable<style::Source::Impl>,

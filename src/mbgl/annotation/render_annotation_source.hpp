@@ -19,7 +19,7 @@ public:
                 const TileParameters&) final;
 
     void upload(gfx::UploadPass&) final;
-    void prepare(PaintParameters&) final;
+    void prepare(const TransformState&, const MapDebugOptions&) final;
     void finishRender(PaintParameters&) final;
 
     std::vector<std::reference_wrapper<RenderTile>> getRenderTiles() final;

@@ -127,8 +127,8 @@ void RenderGeoJSONSource::upload(gfx::UploadPass& parameters) {
     tilePyramid.upload(parameters);
 }
 
-void RenderGeoJSONSource::prepare(PaintParameters& parameters) {
-    tilePyramid.prepare(parameters);
+void RenderGeoJSONSource::prepare(const TransformState& state, const MapDebugOptions& debugOptions) {
+    tilePyramid.prepare(state, debugOptions);
 }
 
 void RenderGeoJSONSource::finishRender(PaintParameters& parameters) {

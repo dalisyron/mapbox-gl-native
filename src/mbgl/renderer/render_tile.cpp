@@ -70,26 +70,26 @@ void RenderTile::upload(gfx::UploadPass& uploadPass) {
     }
 }
 
-void RenderTile::prepare(PaintParameters& parameters) {
-    if (parameters.debugOptions != MapDebugOptions::NoDebug &&
+void RenderTile::prepare(const TransformState& state, const MapDebugOptions& debugOptions) {
+    if (debugOptions != MapDebugOptions::NoDebug &&
         (!debugBucket || debugBucket->renderable != tile.isRenderable() ||
          debugBucket->complete != tile.isComplete() ||
          !(debugBucket->modified == tile.modified) ||
          !(debugBucket->expires == tile.expires) ||
-         debugBucket->debugMode != parameters.debugOptions)) {
+         debugBucket->debugMode != debugOptions)) {
         debugBucket = std::make_unique<DebugBucket>(
             tile.id, tile.isRenderable(), tile.isComplete(), tile.modified, tile.expires,
-            parameters.debugOptions);
-    } else if (parameters.debugOptions == MapDebugOptions::NoDebug) {
+            debugOptions);
+    } else if (debugOptions == MapDebugOptions::NoDebug) {
         debugBucket.reset();
     }
 
     // Calculate two matrices for this tile: matrix is the standard tile matrix; nearClippedMatrix
     // clips the near plane to 100 to save depth buffer precision
-    parameters.state.matrixFor(matrix, id);
-    parameters.state.matrixFor(nearClippedMatrix, id);
-    matrix::multiply(matrix, parameters.projMatrix, matrix);
-    matrix::multiply(nearClippedMatrix, parameters.nearClippedProjMatrix, nearClippedMatrix);
+    state.matrixFor(matrix, id);
+    state.matrixFor(nearClippedMatrix, id);
+    matrix::multiply(matrix, state.getDefaultProjMatrix(), matrix);
+    matrix::multiply(nearClippedMatrix, state.getNearClippedProjMatrix(), nearClippedMatrix);
 }
 
 void RenderTile::finishRender(PaintParameters& parameters) {

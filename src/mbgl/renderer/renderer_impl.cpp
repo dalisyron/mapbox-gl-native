@@ -291,6 +291,13 @@ void Renderer::Impl::render(const UpdateParameters& updateParameters) {
 
     observer->onWillStartRenderingFrame();
 
+    // Update all matrices and generate data that we should upload to the GPU.
+    for (const auto& entry : renderSources) {
+        if (entry.second->isEnabled()) {
+            entry.second->prepare(updateParameters.transformState, updateParameters.debugOptions);
+        }
+    }
+
     // Set render tiles to the render items.
     for (auto& renderItem : renderItems) {
         if (!renderItem.source) {
@@ -326,8 +333,7 @@ void Renderer::Impl::render(const UpdateParameters& updateParameters) {
 
             if (placementChanged) {
                 usedSymbolLayers.insert(symbolLayer->layerID());
-                mat4 projMatrix;
-                updateParameters.transformState.getProjMatrix(projMatrix);
+                const mat4& projMatrix = updateParameters.transformState.getDefaultProjMatrix();
                 placement->placeLayer(*symbolLayer, projMatrix, updateParameters.debugOptions & MapDebugOptions::Collision);
             }
         }
@@ -366,18 +372,6 @@ void Renderer::Impl::render(const UpdateParameters& updateParameters) {
     };
 
     parameters.symbolFadeChange = placement->symbolFadeChange(updateParameters.timePoint);
-
-    // TODO: move this pass to before the PaintParameters initialization
-    // - PREPARE PASS -------------------------------------------------------------------------------
-    // Runs an initialization pass for all sources.
-    {
-        // Update all matrices and generate data that we should upload to the GPU.
-        for (const auto& entry : renderSources) {
-            if (entry.second->isEnabled()) {
-                entry.second->prepare(parameters);
-            }
-        }
-    }
 
     // - UPLOAD PASS -------------------------------------------------------------------------------
     // Uploads all required buffers and images before we do any actual rendering.

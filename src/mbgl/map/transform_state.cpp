@@ -95,6 +95,39 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
     }
 }
 
+const mat4& TransformState::getDefaultProjMatrix() const {
+    if (!defaultProjMatrix) {
+        mat4 res;
+        getProjMatrix(res);
+        defaultProjMatrix = std::move(res);
+    }
+
+    return *defaultProjMatrix;
+}
+
+const mat4& TransformState::getAlignedProjMatrix() const {
+    if (!alignedProjMatrix) {
+        mat4 res;
+        getProjMatrix(res, 1, true);
+        alignedProjMatrix = std::move(res);
+    }
+
+    return *alignedProjMatrix;
+}
+
+const mat4& TransformState::getNearClippedProjMatrix() const {
+    if (!nearClippedProjMatrix) {
+        mat4 res;
+        // Calculate a second projection matrix with the near plane clipped to 100 so as
+        // not to waste lots of depth buffer precision on very close empty space, for layer
+        // types (fill-extrusion) that use the depth buffer to emulate real-world space.
+        getProjMatrix(res, 100u);
+        nearClippedProjMatrix = std::move(res);
+    }
+
+    return *nearClippedProjMatrix;
+}
+
 #pragma mark - Dimensions
 
 Size TransformState::getSize() const {

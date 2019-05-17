@@ -46,9 +46,9 @@ void TilePyramid::upload(gfx::UploadPass& parameters) {
     }
 }
 
-void TilePyramid::prepare(PaintParameters& parameters) {
+void TilePyramid::prepare(const TransformState& state, const MapDebugOptions& debugOptions) {
     for (auto& tile : renderTiles) {
-        tile.prepare(parameters);
+        tile.prepare(state, debugOptions);
     }
 }
 
