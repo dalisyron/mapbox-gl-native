@@ -74,36 +74,6 @@ public:
         createInstance(gl::Context& context,
                        const ProgramParameters& programParameters,
                        const std::string& additionalDefines) {
-
-            
-
-#if MBGL_HAS_BINARY_PROGRAMS
-            optional<std::string> cachePath =
-                programParameters.cachePath(programs::gl::ShaderSource<Name>::name);
-            std::string programIdentifier;
-            if (cachePath && context.supportsProgramBinaries()) {
-                programIdentifier = programs::gl::programIdentifier(
-                    programParameters.getDefines(), additionalDefines, programs::gl::preludeHash,
-                    programs::gl::ShaderSource<Name>::hash);
-
-                try {
-                    if (auto cachedBinaryProgram = util::readFile(*cachePath)) {
-                        const BinaryProgram binaryProgram(std::move(*cachedBinaryProgram));
-                        if (binaryProgram.identifier() == programIdentifier) {
-                            return std::make_unique<Instance>(context, binaryProgram);
-                        } else {
-                            Log::Warning(Event::OpenGL,
-                                         "Cached program %s changed. Recompilation required.",
-                                         programs::gl::ShaderSource<Name>::name);
-                        }
-                    }
-                } catch (std::runtime_error& error) {
-                    Log::Warning(Event::OpenGL, "Could not load cached program: %s",
-                                 error.what());
-                }
-            }
-#endif
-
             // Compile the shader
             const std::initializer_list<const char*> vertexSource = {
                 programParameters.getDefines().c_str(),
@@ -119,20 +89,6 @@ public:
             };
             auto result = std::make_unique<Instance>(context, vertexSource, fragmentSource);
 
-#if MBGL_HAS_BINARY_PROGRAMS
-            if (cachePath && context.supportsProgramBinaries()) {
-                try {
-                    if (const auto binaryProgram =
-                            result->template get<BinaryProgram>(context, programIdentifier)) {
-                        util::write_file(*cachePath, binaryProgram->serialize());
-                        Log::Warning(Event::OpenGL, "Caching program in: %s", (*cachePath).c_str());
-                    }
-                } catch (std::runtime_error& error) {
-                    Log::Warning(Event::OpenGL, "Failed to cache program: %s", error.what());
-                }
-            }
-#endif
- 
             return std::move(result);
         }
 
